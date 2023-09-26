@@ -11,6 +11,7 @@ export enum PlayerModalTabs {
   IDENTIFIERS,
   HISTORY,
   BAN,
+  CARD,
 }
 
 const playerModalTabAtom = atom<PlayerModalTabs>({
@@ -33,3 +34,28 @@ export const usePlayerModalVisibility = () =>
   useRecoilState(modalVisibilityAtom);
 export const useSetPlayerModalVisibility = () =>
   useSetRecoilState(modalVisibilityAtom);
+
+const modalResourceAtom = atom({
+    key: "playerModalResource",
+    default: "",
+  });
+  
+  export const usePlayerModalResourceValue = () =>
+    useRecoilValue(modalResourceAtom);
+  export const usePlayerModalResource = () =>
+    useRecoilState(modalResourceAtom);
+  export const useSetPlayerModalResource = () =>
+    useSetRecoilState(modalResourceAtom);
+  
+const modalThemeAtom = atom({
+      key: "menuTheme",
+      default: null,
+    });
+    
+export const useModalThemeValue = () =>
+      useRecoilValue(modalThemeAtom);
+export const useModalTheme = () =>
+      useRecoilState(modalThemeAtom);
+export const useSetModalTheme = () =>
+      useSetRecoilState(modalThemeAtom);
+    

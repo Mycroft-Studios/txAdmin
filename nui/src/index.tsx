@@ -12,6 +12,7 @@ import styled from "@emotion/styled";
 import rawMenuTheme from "./styles/theme";
 import rawMenuRedmTheme from "./styles/theme-redm";
 import { useIsRedm } from "./state/isRedm.state";
+import { useSetModalTheme } from "./state/playerModal.state";
 
 registerDebugFunctions();
 
@@ -28,6 +29,7 @@ declare module '@mui/material/styles' {
       logo?: string;
   }
 }
+
 const menuRedmTheme = createTheme(rawMenuRedmTheme);
 const menuTheme = createTheme(rawMenuTheme);
 
@@ -59,11 +61,11 @@ const StyledMaterialDesignContent = styled(MaterialDesignContent)(({ theme }) =>
 
 const App = () => {
   const [isRedm, setIsRedm] = useIsRedm();
-
+  const SetTheme = useSetModalTheme();
   useNuiEvent<string>("setGameName", (gameName: string) => {
     setIsRedm(gameName === 'redm')
   });
-
+  SetTheme(isRedm ? menuRedmTheme : menuTheme);
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={isRedm ? menuRedmTheme : menuTheme}>

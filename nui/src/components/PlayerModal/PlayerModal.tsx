@@ -7,8 +7,9 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Divider,
+  styled
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import {
   Block,
   Close,
@@ -16,6 +17,7 @@ import {
   FormatListBulleted,
   MenuBook,
   Person,
+  MenuOpen,
 } from "@mui/icons-material";
 import {
   useAssociatedPlayerValue,
@@ -26,10 +28,13 @@ import { DialogBaseView } from "./Tabs/DialogBaseView";
 import { PlayerModalErrorBoundary } from "./ErrorHandling/PlayerModalErrorBoundary";
 import { usePermissionsValue } from "../../state/permissions.state";
 import { userHasPerm } from "../../utils/miscUtils";
-import React from "react";
+import { fetchNui } from "../../utils/fetchNui";
+import React, { useState, useEffect } from "react";
 import {
   PlayerModalTabs,
   usePlayerModalTabValue,
+  useSetPlayerModalResource,
+  usePlayerModalResourceValue,
   useSetPlayerModalTab,
   useSetPlayerModalVisibility,
 } from "@nui/src/state/playerModal.state";
@@ -98,7 +103,7 @@ const PlayerModal: React.FC = () => {
           <Close />
         </StyledCloseButton>
       </DialogTitle>
-      <Box display="flex" px={2} pb={2} pt={2} flexGrow={1} overflow="hidden">
+      <Box display="flex" px={2} pt={2} flexShrink={1} overflow="hidden">
         <PlayerModalErrorBoundary>
           {error ? (
             <>
@@ -141,6 +146,7 @@ interface DialogTabProps {
   curTab: PlayerModalTabs;
   icon: JSX.Element;
   isDisabled?: boolean;
+  resource: any;
 }
 
 const DialogTab: React.FC<DialogTabProps> = ({
@@ -149,19 +155,27 @@ const DialogTab: React.FC<DialogTabProps> = ({
   tab,
   icon,
   title,
+  resource
 }) => {
   const setTab = useSetPlayerModalTab();
-
+  const setResource = useSetPlayerModalResource();
+  const currentResource = usePlayerModalResourceValue();
   const stylingClass =
     tab === PlayerModalTabs.BAN ? classes.listItemBan : classes.listItem;
 
-  const isSelected = curTab === tab;
+  const isSelected = resource ? currentResource == resource : curTab === tab;
 
   return (
     <ListItemButton
       className={stylingClass}
       selected={isSelected}
-      onClick={() => setTab(tab)}
+      onClick={() => {
+        if (resource) {
+          setTab(PlayerModalTabs.ACTIONS);
+        }
+        setTab(tab);
+        setResource(resource ? resource : "")
+      }}
       disabled={isDisabled}
     >
       <ListItemIcon>{icon}</ListItemIcon>
@@ -170,43 +184,103 @@ const DialogTab: React.FC<DialogTabProps> = ({
   );
 };
 
+interface Tab {
+  resource: string;
+  title: string;
+}
+interface CustomTabsProps {
+  tabs: Tab;
+}
+
+const CustomTabs: React.FC<CustomTabsProps> = ({tabs}) => {
+  const curTab = usePlayerModalTabValue();
+  const playerPerms = usePermissionsValue();
+  const len = Object.entries(tabs).length;
+  if (len > 0) {
+    return (
+      <span>
+        <Divider sx={{mt: 2, mb: 2}}>User Created</Divider>
+        {
+          Object.entries(tabs).map(([_,value]) =>
+            <DialogTab
+              title={value.title}
+              tab={PlayerModalTabs.CARD}
+              curTab={curTab}
+              resource={value.resource}
+              icon={<MenuOpen />}
+              isDisabled={!userHasPerm("players.ban", playerPerms)}
+            />)
+        }
+      </span>
+    )
+  } else {
+    return <div style={{height: 0, width: 0}}></div>
+  }
+}
+
 const DialogList: React.FC = () => {
   const curTab = usePlayerModalTabValue();
   const t = useTranslate();
   const playerPerms = usePermissionsValue();
+  const [tabs, setTabs] = useState<Tab>();
 
+  const fetchCard = async () => {
+    const response = await fetchNui("fetchCustomTabs");
+    const data = response.e
+
+    setTabs(data); // Update the state with the card data
+  };
+
+  useEffect(() => {
+    fetchCard(); // Call the async function
+  }, []);
+
+  // Handle the case when the tab data is not available yet
+  if (!tabs) {
+    return (
+      <LoadingModal />
+    )
+  }
   return (
     <StyledList>
       <DialogTab
         title={t("nui_menu.player_modal.tabs.actions")}
         tab={PlayerModalTabs.ACTIONS}
         curTab={curTab}
+        resource={null}
         icon={<FlashOn />}
       />
       <DialogTab
         title={t("nui_menu.player_modal.tabs.info")}
         tab={PlayerModalTabs.INFO}
         curTab={curTab}
+        resource={null}
         icon={<Person />}
       />
       <DialogTab
         title={t("nui_menu.player_modal.tabs.ids")}
         tab={PlayerModalTabs.IDENTIFIERS}
         curTab={curTab}
+        resource={null}
         icon={<FormatListBulleted />}
       />
       <DialogTab
         title={t("nui_menu.player_modal.tabs.history")}
         tab={PlayerModalTabs.HISTORY}
         curTab={curTab}
+        resource={null}
         icon={<MenuBook />}
       />
       <DialogTab
         title={t("nui_menu.player_modal.tabs.ban")}
         tab={PlayerModalTabs.BAN}
         curTab={curTab}
+        resource={null}
         icon={<Block />}
         isDisabled={!userHasPerm("players.ban", playerPerms)}
+      />
+      <CustomTabs
+        tabs={tabs}
       />
     </StyledList>
   );
