@@ -4,7 +4,6 @@ import DialogInfoView from "./DialogInfoView";
 import DialogIdView from "./DialogIdView";
 import DialogHistoryView from "./DialogHistoryView";
 import DialogBanView from "./DialogBanView";
-import DialogCardView from "./DialogCardView";
 import {Box} from "@mui/material";
 import {PlayerModalTabs, usePlayerModalTabValue} from "@nui/src/state/playerModal.state";
 
@@ -20,13 +19,12 @@ const tabToRender = (tab: PlayerModalTabs) => {
       return <DialogHistoryView />
     case PlayerModalTabs.BAN:
       return <DialogBanView />
-    case PlayerModalTabs.CARD:
-      return <DialogCardView/>
   }
 }
 
 export const DialogBaseView: React.FC = () => {
   const curTab = usePlayerModalTabValue()
+
   return (
     <Box flexGrow={1} mt={-2} overflow="hidden">
       {tabToRender(curTab)}

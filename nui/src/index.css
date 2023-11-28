@@ -13,10 +13,3 @@ body {
 #root {
     height: 100%
 }
-
-.ac-container {
-    overflow-y: scroll;
-    overflow-x: hidden;
-    max-height: 100%;
-    flex: 1;
-}

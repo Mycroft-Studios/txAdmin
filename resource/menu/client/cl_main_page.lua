@@ -84,32 +84,6 @@ RegisterNUICallback('sendAnnouncement', function(data, cb)
 end)
 
 
-RegisterNUICallback('getAdaptiveCard', function(data, cb)
-    if type(data) ~= 'table' or type(data.resource) ~= 'string' then
-        error("Invalid getAdaptiveCard NUI callback data")
-    end
-    TriggerServerEvent('txsv:req:getAdaptiveCard', data.resource)
-    RegisterNetEvent("txcl:RecieveAdaptiveCard", function(card)
-        cb({e = card})
-    end)
-end)
-
-RegisterNUICallback('fetchCustomTabs', function(_, cb)
-    TriggerServerEvent('txsv:req:getCustomTabs')
-    RegisterNetEvent("txcl:RecieveCustomTabs", function(tabs)
-        cb({e = tabs})
-    end)
-end)
-
-RegisterNUICallback('ACActionSubmit', function(data, cb)
-    if type(data) ~= 'table' then
-        error("Invalid ACActionSubmit NUI callback data")
-    end
-    TriggerServerEvent('txsv:req:ACActionSubmit', data)
-    cb({})
-end)
-
-
 --[[ EVENT HANDLERS + FUNCTION LOGIC ]]
 
 local function handleTpNormally(x, y, z)

@@ -22,7 +22,6 @@ import { userHasPerm } from "../../../utils/miscUtils";
 import { useTranslate } from "react-polyglot";
 import { usePermissionsValue } from "../../../state/permissions.state";
 import { DialogLoadError } from "./DialogLoadError";
-import { useServerCtxValue } from "../../../state/server.state";
 import { GenericApiError, GenericApiResp } from "@shared/genericApiTypes";
 import { useSetPlayerModalVisibility } from "@nui/src/state/playerModal.state";
 
@@ -63,7 +62,6 @@ const DialogActionView: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
   const t = useTranslate();
   const { goToFramePage } = useIFrameCtx();
-  const serverCtx = useServerCtxValue();
   const playerPerms = usePermissionsValue();
   const setModalOpen = useSetPlayerModalVisibility();
   const { closeMenu, showNoPerms } = usePlayerModalContext();
@@ -217,15 +215,6 @@ const DialogActionView: React.FC = () => {
     if (!userHasPerm("players.teleport", playerPerms))
       return showNoPerms("Teleport");
 
-    // Since we depend on server side gamestate awareness
-    // we disable this function from being used if onesync
-    // isn't on
-    if (!serverCtx.oneSync.status) {
-      return enqueueSnackbar(t("nui_menu.misc.onesync_error"), {
-        variant: "error",
-      });
-    }
-
     closeMenu();
     fetchNui("tpToPlayer", { id: assocPlayer.id });
     enqueueSnackbar(
@@ -238,15 +227,6 @@ const DialogActionView: React.FC = () => {
     if (!userHasPerm("players.teleport", playerPerms))
       return showNoPerms("Teleport");
 
-    // Since we depend on server side gamestate awareness
-    // we disable this function from being used if onesync
-    // isn't on
-    if (!serverCtx.oneSync.status) {
-      return enqueueSnackbar(t("nui_menu.misc.onesync_error"), {
-        variant: "error",
-      });
-    }
-    
     closeMenu();
     fetchNui("summonPlayer", { id: assocPlayer.id });
     enqueueSnackbar(
