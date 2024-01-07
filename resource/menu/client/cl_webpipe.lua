@@ -1,5 +1,5 @@
 -- Prevent running if menu is disabled
-if not TX_MENU_ENABLED then return end
+--if not TX_MENU_ENABLED then return end
 
 -- =============================================
 --  This file contains all Client WebPipe logic.

@@ -5,6 +5,12 @@ local min = math.min
 local max = math.max
 local type = type
 
+if IS_NY then
+  GetDisabledControlNormal = function(_, control)
+    return 1
+  end
+end
+
 function table.copy(x)
   local copy = {}
   for k, v in pairs(x) do
@@ -51,8 +57,10 @@ end
 function IsGamepadControl()
   if IS_FIVEM then
     return not IsUsingKeyboard(2)
-  else
+  elseif IS_REDM then
     return not Citizen.InvokeNative(0xA571D46727E2B718, 2) -- IsUsingKeyboardAndMouse
+  else -- IS_NY
+    return IsUsingController()
   end
 end
 

@@ -6,6 +6,29 @@ local GetSmartControlNormal = GetSmartControlNormal
 local SETTINGS = _G.CONTROL_SETTINGS
 local CONTROLS = _G.CONTROL_MAPPING
 
+if IS_NY then
+  PlayerId = function()
+    return GetPlayerId()
+  end
+
+  PlayerPedId = function()
+    return GetPlayerChar(PlayerId())
+  end
+
+  GetEntityCoords = function(ped)
+    local x, y, z = GetCharCoordinates(ped)
+    return vector3(x, y, z)
+  end
+
+  SetEntityCoords = function(ped, x, y, z)
+    return SetCharCoordinatesDontClearPlayerTasks(ped, x, y, z)
+  end
+
+  SetEntityHeading = function(ped, heading)
+    return SetCharHeading(ped, heading)
+  end
+end
+
 -------------------------------------------------------------------------------
 local function GetSpeedMultiplier()
   local fastNormal = GetSmartControlNormal(CONTROLS.MOVE_FAST)
@@ -37,8 +60,7 @@ local function UpdateCamera()
     local speedMultiplier = GetSpeedMultiplier()
 
     -- Get rotation input
-    local lookX = GetSmartControlNormal(CONTROLS.LOOK_X)
-    local lookY = GetSmartControlNormal(CONTROLS.LOOK_Y)
+    local lookX, lookY = GetMouseInput()
 
     -- Get position input
     local moveX = GetSmartControlNormal(CONTROLS.MOVE_X)
@@ -80,33 +102,23 @@ local keysTable = {
   {'Fwd/Back', CONTROLS.MOVE_Y},
 }
 local redmInstructionGroup, redmPromptTitle
+if IS_REDM then
+  redmPromptTitle = CreateVarString(10, 'LITERAL_STRING', 'NoClip')
+  redmInstructionGroup = makeRedmInstructionalGroup(keysTable)
+end
 
 
 function StartFreecamThread()
-  if IS_REDM then
-    redmPromptTitle = CreateVarString(10, 'LITERAL_STRING', 'NoClip')
-    redmInstructionGroup = makeRedmInstructionalGroup(keysTable)
-  end
   -- Camera/Pos updating thread
   Citizen.CreateThread(function()
     local ped = PlayerPedId()
     local initialPos = GetEntityCoords(ped)
     SetFreecamPosition(initialPos[1], initialPos[2], initialPos[3])
-    local veh = GetVehiclePedIsIn(ped, false)
-    if IsPedOnMount(ped) then
-      veh = GetMount(ped)
-    end
-
     local function updatePos(pos, rotZ)
       if pos ~= nil and rotZ ~= nil then
         -- Update ped
         SetEntityCoords(ped, pos.x, pos.y, pos.z, false, false, false, false)
         SetEntityHeading(ped, rotZ)
-        -- Update veh
-        if veh and veh > 0 and DoesEntityExist(veh) then
-          SetEntityCoords(veh, pos.x, pos.y, pos.z, false, false, false, false)
-          SetEntityHeading(veh, rotZ)
-        end
       end
     end
 
@@ -127,22 +139,24 @@ function StartFreecamThread()
   end)
 
   -- Start instructional thread
-  CreateThread(function()
-    local fivemScaleform = IS_FIVEM and makeFivemInstructionalScaleform(keysTable)
-    while IsFreecamActive() do
-      if IS_FIVEM then
-        DrawScaleformMovieFullscreen(fivemScaleform, 255, 255, 255, 255, 0)
-      else
-        PromptSetActiveGroupThisFrame(redmInstructionGroup.groupId, redmPromptTitle, 1, 0, 0, 0)
+  if not IS_NY then
+    CreateThread(function()
+      local fivemScaleform = IS_FIVEM and makeFivemInstructionalScaleform(keysTable)
+      while IsFreecamActive() do
+        if IS_FIVEM then
+          DrawScaleformMovieFullscreen(fivemScaleform, 255, 255, 255, 255, 0)
+        else
+          PromptSetActiveGroupThisFrame(redmInstructionGroup.groupId, redmPromptTitle, 1, 0, 0, 0)
+        end
+        Wait(0)
       end
-      Wait(0)
-    end
 
-    --cleanup of the scaleform movie
-    if IS_FIVEM then
-      SetScaleformMovieAsNoLongerNeeded()
-    end
-  end)
+      --cleanup of the scaleform movie
+      if IS_FIVEM then
+        SetScaleformMovieAsNoLongerNeeded()
+      end
+    end)
+  end
 end
 
 --------------------------------------------------------------------------------

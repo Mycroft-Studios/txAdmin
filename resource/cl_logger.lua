@@ -1,4 +1,9 @@
 -- Death reasons
+
+if GetGameName() == 'libertym' then
+    return
+end
+
 local fivemDeathHashTable = {
     [GetHashKey('WEAPON_ANIMAL')] = 'Animal',
     [GetHashKey('WEAPON_COUGAR')] = 'Cougar',
@@ -312,16 +317,19 @@ end)
 --[[ Thread ]]--
 local deathFlag = false
 local IsEntityDead = IsEntityDead
-CreateThread(function()
-    while true do
-        Wait(500)
-        local ped = PlayerPedId()
-        local isDead = IsEntityDead(ped)
-        if isDead and not deathFlag then
-            deathFlag = true
-            processDeath(ped)
-        elseif not isDead then
-            deathFlag = false
+local PlayerPedId = PlayerPedId
+if PlayerPedId then
+    CreateThread(function()
+        while true do
+            Wait(500)
+            local ped = PlayerPedId()
+            local isDead = IsEntityDead(ped)
+            if isDead and not deathFlag then
+                deathFlag = true
+                processDeath(ped)
+            elseif not isDead then
+                deathFlag = false
+            end
         end
-    end
-end)
+    end)
+end

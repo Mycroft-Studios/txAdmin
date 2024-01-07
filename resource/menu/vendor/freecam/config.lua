@@ -12,7 +12,7 @@ if IS_FIVEM then
 
   CTRL_RIGHT_TRIGGER = 71         -- INPUT_VEH_ACCELERATE
   CTRL_LEFT_TRIGGER = 72          -- INPUT_VEH_BRAKE
-else
+elseif IS_REDM then
   CTRL_MOUSE_LR = 0xA987235F      -- INPUT_LOOK_LR
   CTRL_MOUSE_UD = 0xD2047988      -- INPUT_LOOK_UD
   CTRL_SLOW = 0x580C4473          -- INPUT_HUD_SPECIAL
@@ -24,6 +24,15 @@ else
 
   CTRL_RIGHT_TRIGGER = 0x5B9FD4E2 -- INPUT_VEH_ACCELERATE
   CTRL_LEFT_TRIGGER = 0x6E1F639B  -- INPUT_VEH_BRAKE
+else -- IS_NY
+  CTRL_MOUSE_LR = 1
+  CTRL_MOUSE_UD = 2
+  CTRL_SLOW = 18
+  CTRL_FAST = 16
+  CTRL_GO_UP = 81
+  CTRL_GO_DOWN = 69
+  CTRL_FRONT_BACK = 87
+  CTRL_LEFT_RIGHT = 66
 end
 
 --------------------------------------------------------------------------------

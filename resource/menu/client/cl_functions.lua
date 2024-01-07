@@ -150,15 +150,22 @@ local redmSoundLibrary = {
     enter = {'BET_PROMPT', 'HUD_POKER'},
     confirm = {'BULLSEYE', 'FMA_ARCHERY_Sounds'},
 }
+local nySoundLibrary = {
+    move = {'FRONTEND_MENU', 'BACK_ALT_1'},
+    enter = {'FRONTEND_MENU', 'BACK_ALT_1'},
+    confirm = {'FRONTEND_MENU', 'BACK_ALT_1'},
+}
 
 --- Used to play UI sounds
 ---@param sound string
 function playLibrarySound(sound)
     if IS_FIVEM then
         PlaySoundFrontend(-1, fivemSoundLibrary[sound][1], fivemSoundLibrary[sound][2], 1)
-    else
+    elseif IS_REDM then
         Citizen.InvokeNative(0x9D746964E0CF2C5F, redmSoundLibrary[sound][1], redmSoundLibrary[sound][2])  -- ReleaseShardSounds
         Wait(0)
         PlaySoundFrontend(redmSoundLibrary[sound][1], redmSoundLibrary[sound][2], true, 1);
+    else -- IS_NY
+        PlaySoundFrontend(-1, nySoundLibrary[sound][2])
     end
 end

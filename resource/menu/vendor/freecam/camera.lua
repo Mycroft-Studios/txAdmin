@@ -19,6 +19,39 @@ local _internal_vecX = nil
 local _internal_vecY = nil
 local _internal_vecZ = nil
 
+if IS_NY then
+  GetGameplayCamCoord = function()
+    local gameCam = GetGameCam()
+    local camPosX, CamPosY, CamPosZ = GetCamPos(gameCam)
+    return vector3(camPosX, CamPosY, CamPosZ)
+  end
+
+  GetGameplayCamRot = function()
+    local gameCam = GetGameCam()
+    local camRotX, CamRotY, CamRotZ = GetCamRot(gameCam, 2)
+    return vector3(camRotX, CamRotY, CamRotZ)
+  end
+
+  SetCamCoord = function(cam, x, y, z)
+    print('SetCamCoord', cam, x, y, z)
+    Citizen.InvokeNative(`SET_CAM_POS`, cam, x, y, z)
+  end
+  SetFocusPosAndVel = function()
+    -- nil function for NY
+    return
+  end
+
+  LockMinimapAngle = function()
+    return
+  end
+  UnlockMinimapAngle = function()
+    return
+  end
+
+  ClearFocus = function()
+    return
+  end
+end
 --------------------------------------------------------------------------------
 
 function GetInitialCameraPosition()
@@ -119,6 +152,9 @@ end
 --------------------------------------------------------------------------------
 
 function IsFreecamActive()
+  if not _internal_camera or not DoesCamExist(_internal_camera) then
+    return false
+  end
   return IsCamActive(_internal_camera) == 1
 end
 
@@ -134,8 +170,9 @@ function SetFreecamActive(active)
     local pos = GetInitialCameraPosition()
     local rot = GetInitialCameraRotation()
 
-    _internal_camera = CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
+    _internal_camera = IS_NY and CreateCam(14) or CreateCam('DEFAULT_SCRIPTED_CAMERA', true)
 
+    SetCamActive(_internal_camera, active)
     SetFreecamFov(_G.CAMERA_SETTINGS.FOV)
     SetFreecamPosition(pos.x, pos.y, pos.z)
     SetFreecamRotation(rot.x, rot.y, rot.z)
@@ -150,5 +187,9 @@ function SetFreecamActive(active)
     TriggerEvent('freecam:onExit')
   end
 
-  RenderScriptCams(active, enableEasing, easingDuration, true, true)
+  if IS_NY then
+    ActivateScriptedCams(active, active)
+  else 
+    RenderScriptCams(active, enableEasing, easingDuration, true, true)
+  end
 end

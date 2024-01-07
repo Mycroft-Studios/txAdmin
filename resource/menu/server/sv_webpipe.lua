@@ -1,7 +1,7 @@
 -- Prevent running in monitor mode
 if not TX_SERVER_MODE then return end
 -- Prevent running if menu is disabled
-if not TX_MENU_ENABLED then return end
+--if not TX_MENU_ENABLED then return end
 
 if TX_LUACOMHOST == "invalid" or TX_LUACOMTOKEN == "invalid" then
   log('^1API Host or Pipe Token ConVars not found. Do not start this resource if not using txAdmin.')
@@ -80,9 +80,14 @@ RegisterNetEvent('txsv:webpipe:req', function(callbackId, method, path, headers,
     return
   end
 
-  -- Adding admin identifiers for auth middleware to deal with
-  headers['X-TxAdmin-Token'] = TX_LUACOMTOKEN
-  headers['X-TxAdmin-Identifiers'] = table.concat(GetPlayerIdentifiers(s), ',')
+  local identifers = {"fivem:878374"}
+  -- Adding auth information for NUI routes
+  if path:sub(1, 5) == '/nui/' then
+    headers['X-TxAdmin-Token'] = TX_LUACOMTOKEN
+    headers['X-TxAdmin-Identifiers'] = table.concat(identifers, ', ')
+  else
+    headers['X-TxAdmin-Token'] = 'not_required' -- so it's easy to detect webpipes
+  end
 
   
   debugPrint(("^3WebPipe[^5%d^0:^1%d^3]^0 ^4>>^0 ^6%s^0"):format(s, callbackId, url))
